@@ -50,17 +50,86 @@ if status is-interactive
     end
 
     # Show sleep inhibitors (services preventing sleep)
-    set -l inhibitors (systemd-inhibit --list --no-legend 2>/dev/null | grep -v "PowerDevil\|Screen Locker\|NetworkManager\|Realtime Kit\|UPower")
-    if test -n "$inhibitors"
-        echo
-        set_color --bold cyan
-        echo "Sleep inhibitors active:"
-        set_color normal
-        echo "$inhibitors" | while read -l line
-            set -l who (echo $line | awk '{print $1}')
-            set -l why (echo $line | awk '{for(i=7;i<=NF-1;i++) printf $i" "; print ""}')
-            echo "  - $who: $why"
+    # Parse column positions from header so it adapts to any column width
+    set -l raw_output (systemd-inhibit --list 2>/dev/null)
+    if test (count $raw_output) -gt 2
+        set -l header $raw_output[1]
+        # Find column start positions from the header to handle any width
+        set -l col_who (string match -r -n 'WHO' "$header" | string replace -r '(\d+).*' '$1')
+        set -l col_uid (string match -r -n 'UID' "$header" | string replace -r '(\d+).*' '$1')
+        set -l col_pid (string match -r -n 'PID' "$header" | string replace -r '(\d+).*' '$1')
+        set -l col_comm (string match -r -n 'COMM' "$header" | string replace -r '(\d+).*' '$1')
+        set -l col_what (string match -r -n 'WHAT' "$header" | string replace -r '(\d+).*' '$1')
+        set -l col_mode (string match -r -n 'MODE' "$header" | string replace -r '(\d+).*' '$1')
+
+        set -l shown 0
+        for line in $raw_output[2..-2] # skip header and "N inhibitors listed." footer
+            test -z "$line"; and continue
+            # Skip known system inhibitors
+            string match -q '*PowerDevil*' "$line"; and continue
+            string match -q '*Screen Locker*' "$line"; and continue
+            string match -q '*NetworkManager*' "$line"; and continue
+            string match -q '*Realtime Kit*' "$line"; and continue
+            string match -q '*UPower*' "$line"; and continue
+
+            set -l who (printf '%s' "$line" | cut -c$col_who-(math $col_uid - 1) | string trim)
+            set -l pid (printf '%s' "$line" | cut -c$col_pid-(math $col_comm - 1) | string trim)
+            set -l comm (printf '%s' "$line" | cut -c$col_comm-(math $col_what - 1) | string trim)
+            set -l mode (printf '%s' "$line" | cut -c$col_mode- | string trim)
+
+            # Resolve a friendly name from the process command line
+            set -l label "$comm"
+            if test "$comm" = "code-oss" -o "$comm" = "code"
+                set -l workspace (ps -p $pid -o args= 2>/dev/null | string match -r '/home/\S+' | path basename)
+                if test -n "$workspace"
+                    set label "Code OSS ($workspace)"
+                else
+                    set label "Code OSS"
+                end
+            else if test "$comm" = "electron" -o "$comm" = "chrome" -o "$comm" = "chromium"
+                set -l cmdline (ps -p $pid -o args= 2>/dev/null)
+                set -l app_name (echo $cmdline | string match -r '(?:--app-name=|/lib/)(\S+)' | tail -1)
+                if test -n "$app_name"
+                    set label "$app_name"
+                else
+                    set label "$comm (PID $pid)"
+                end
+            else if test "$comm" = "systemd-inhibit"
+                # systemd-inhibit wraps another service — use WHO instead
+                set label "$who"
+            end
+
+            if test $shown -eq 0
+                echo
+                set_color --bold cyan
+                echo "Sleep inhibitors active:"
+                set_color normal
+                set shown 1
+            end
+            echo "  - $label [$mode]"
         end
-        echo
+        if test $shown -eq 1
+            echo
+        end
+    end
+
+    # Show screen idle inhibitors (apps preventing screen dimming)
+    set -l screen_raw (qdbus6 --literal org.kde.Solid.PowerManagement /org/kde/Solid/PowerManagement/PolicyAgent org.kde.Solid.PowerManagement.PolicyAgent.ListInhibitions 2>/dev/null)
+    if test -n "$screen_raw"
+        # Parse the aas format: {{app, reason}, {app, reason}, ...}
+        set -l pairs (string match -r -a '"[^"]*",\s*"[^"]*"' "$screen_raw")
+        if test (count $pairs) -gt 0
+            set_color --bold magenta
+            echo "Screen inhibitors active:"
+            set_color normal
+            for pair in $pairs
+                set -l parts (string match -r -a '"([^"]*)"' "$pair")
+                # parts[1] is full match, parts[2] is app, parts[3] is full match, parts[4] is reason
+                set -l app (path basename "$parts[2]")
+                set -l reason "$parts[4]"
+                echo "  - $app: $reason"
+            end
+            echo
+        end
     end
 end
