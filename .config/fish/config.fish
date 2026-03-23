@@ -113,6 +113,21 @@ if status is-interactive
         end
     end
 
+    # Dotfiles reminder
+    set_color --dim
+    echo "dotfiles: config status | config add <file> | config commit | config push"
+    set_color normal
+    set -l dotfile_changes (/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME status --porcelain 2>/dev/null)
+    if test -n "$dotfile_changes"
+        set_color --bold yellow
+        echo "Uncommitted dotfile changes:"
+        set_color normal
+        for change in $dotfile_changes
+            echo "  $change"
+        end
+        echo
+    end
+
     # Show screen idle inhibitors (apps preventing screen dimming)
     set -l screen_raw (qdbus6 --literal org.kde.Solid.PowerManagement /org/kde/Solid/PowerManagement/PolicyAgent org.kde.Solid.PowerManagement.PolicyAgent.ListInhibitions 2>/dev/null)
     if test -n "$screen_raw"
