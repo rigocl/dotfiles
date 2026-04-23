@@ -92,8 +92,10 @@ announce "Pruning ~/.cache (unused > $CACHE_DAYS days)"
 cache_before=$(du -sh ~/.cache | cut -f1)
 echo "Before: $cache_before"
 if confirm "Clean ~/.cache now? [y/N]"; then
-  find ~/.cache -type f -mtime +$CACHE_DAYS -print -delete
-  find ~/.cache -type d -empty -print -delete
+  find ~/.cache -type f -mtime +$CACHE_DAYS \
+    -not -path "*/ms-playwright/*" -print -delete
+  find ~/.cache -type d -empty \
+    -not -path "*/ms-playwright*" -print -delete
 fi
 cache_after=$(du -sh ~/.cache | cut -f1)
 echo "After: $cache_after"
