@@ -59,8 +59,17 @@ announce "Arch Spring‑Clean starting $(date)  —  using $AUR"
 
 # ---------- 1. Optional system upgrade ------------------------------------
 if $DO_UPGRADE; then
+  # Re-rank mirrors right before upgrading. The cachyos-rate-mirrors timer only
+  # runs every ~10 days, and upgrading against a lagging mirror ends in 404s.
+  # A failed ranking warns and keeps the old mirrorlist rather than aborting.
+  if command -v cachyos-rate-mirrors &>/dev/null; then
+    announce "Ranking mirrors (cachyos-rate-mirrors)"
+    sudo cachyos-rate-mirrors || echo "[!] Mirror ranking failed; continuing with the current mirrorlist."
+  fi
+
   announce "System upgrade ($AUR)"
-  $AUR -Syu --ask 4   # interactive for .pacnew merges
+  # -Syy forces a fresh database download, since the mirrors may have just changed.
+  $AUR -Syyu --ask 4   # interactive for .pacnew merges
   echo "Run 'sudo pacdiff' after the script to merge new config files."
 fi
 
