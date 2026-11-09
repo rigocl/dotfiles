@@ -1,0 +1,7 @@
+[Unit]
+Description=Keep the work Mac's acli and AWS SSO sign-ins renewed
+
+[Service]
+Type=oneshot
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/.local/bin/mac-auth-keepalive

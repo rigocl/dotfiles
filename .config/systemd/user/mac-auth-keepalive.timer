@@ -1,0 +1,9 @@
+[Unit]
+Description=Every 40 minutes: renew the work Mac's acli and AWS sign-ins
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=40min
+
+[Install]
+WantedBy=timers.target
