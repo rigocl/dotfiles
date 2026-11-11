@@ -79,8 +79,10 @@ verbatim, so the new session starts with it as its first message. If he
 declines, stay and do not ask again.
 
 Capture threshold — save deliberately, not eagerly. Save: durable
-decisions, hard-won gotchas/runbooks, corrections/feedback, and
-ongoing-project checkpoint state. Do not save: session ephemera, facts
+decisions, hard-won gotchas/runbooks and corrections/feedback. Project
+status and pending work go in the project's `TODO.md` (`hw todo` lists and
+edits it), not in memory. A topic with no project folder keeps its state in
+the body of its memory file. Do not save: session ephemera, facts
 derivable from a repo or config, one-off fixes. Update the existing
 topic file over creating near-duplicates; delete what turns out wrong.
 Every save/update must be mentioned in the reply ("saved to X") so it
