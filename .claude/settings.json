@@ -1,9 +1,10 @@
 {
+  "cleanupPeriodDays": 1095,
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_SCROLL_SPEED": "10"
   },
-  "model": "opus",
+  "model": "fable",
   "hooks": {
     "PreToolUse": [
       {
@@ -26,11 +27,11 @@
         ]
       },
       {
-        "matcher": "Edit|Write|NotebookEdit|Bash",
+        "matcher": "Edit|Write|NotebookEdit|Bash|AskUserQuestion",
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.local/bin/hw hook pre-tool",
+            "command": "python3 -c 'import os, sys\ndef hw_code(p):\n    try:\n        import hashlib, marshal\n        with open(p, \"rb\") as f:\n            src = f.read()\n        key = hashlib.sha256((\"hw-hook 1 %s %d\\n\" % (sys.version, sys.flags.optimize)).encode() + src).digest()\n        d = os.path.join(os.environ.get(\"HW_DATA\", os.path.join(os.path.expanduser(\"~\"), \".local/share/herdr-workspace\")), \"cache\")\n        pyc = os.path.join(d, \"hook-%s-%s.pyc\" % (sys.implementation.cache_tag, hashlib.sha256(p.encode()).hexdigest()[:12]))\n        try:\n            with open(pyc, \"rb\") as f:\n                b = f.read()\n            if b[:32] == key:\n                return marshal.loads(b[32:])\n        except Exception:\n            pass\n        code = compile(src, p, \"exec\", dont_inherit=True)\n        tmp = \"%s.%d.tmp\" % (pyc, os.getpid())\n        try:\n            os.makedirs(d, exist_ok=True)\n            with open(tmp, \"wb\") as f:\n                f.write(key + marshal.dumps(code))\n            os.replace(tmp, pyc)\n        except Exception as e:\n            os.environ[\"HW_HOOK_ROUTE\"] = \"compiled, not cached: %s\" % e\n            try:\n                os.remove(tmp)\n            except OSError:\n                pass\n        return code\n    except Exception as e:\n        os.environ[\"HW_HOOK_ROUTE\"] = \"script: %s: %s\" % (type(e).__name__, e)\n        os.execv(p, sys.argv)\ndel sys.argv[0]\nif sys.path[:1] == [\"\"]:\n    sys.path[0] = os.path.dirname(os.path.realpath(sys.argv[0]))\ncode = hw_code(sys.argv[0])\nm = type(sys)(\"__main__\")\nm.__file__, m.__builtins__ = sys.argv[0], __builtins__\nsys.modules[\"__main__\"] = m\nexec(code, m.__dict__)\n' $HOME/.local/bin/hw hook pre-tool",
             "timeout": 5
           }
         ]
@@ -50,8 +51,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.local/bin/hw hook session-start",
-            "timeout": 10
+            "command": "python3 /home/rigo/.local/lib/memory-server/memsrv.py hint",
+            "timeout": 5
           }
         ]
       },
@@ -59,8 +60,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 /home/rigo/.local/lib/memory-server/memsrv.py hint",
-            "timeout": 5
+            "command": "python3 -c 'import os, sys\ndef hw_code(p):\n    try:\n        import hashlib, marshal\n        with open(p, \"rb\") as f:\n            src = f.read()\n        key = hashlib.sha256((\"hw-hook 1 %s %d\\n\" % (sys.version, sys.flags.optimize)).encode() + src).digest()\n        d = os.path.join(os.environ.get(\"HW_DATA\", os.path.join(os.path.expanduser(\"~\"), \".local/share/herdr-workspace\")), \"cache\")\n        pyc = os.path.join(d, \"hook-%s-%s.pyc\" % (sys.implementation.cache_tag, hashlib.sha256(p.encode()).hexdigest()[:12]))\n        try:\n            with open(pyc, \"rb\") as f:\n                b = f.read()\n            if b[:32] == key:\n                return marshal.loads(b[32:])\n        except Exception:\n            pass\n        code = compile(src, p, \"exec\", dont_inherit=True)\n        tmp = \"%s.%d.tmp\" % (pyc, os.getpid())\n        try:\n            os.makedirs(d, exist_ok=True)\n            with open(tmp, \"wb\") as f:\n                f.write(key + marshal.dumps(code))\n            os.replace(tmp, pyc)\n        except Exception as e:\n            os.environ[\"HW_HOOK_ROUTE\"] = \"compiled, not cached: %s\" % e\n            try:\n                os.remove(tmp)\n            except OSError:\n                pass\n        return code\n    except Exception as e:\n        os.environ[\"HW_HOOK_ROUTE\"] = \"script: %s: %s\" % (type(e).__name__, e)\n        os.execv(p, sys.argv)\ndel sys.argv[0]\nif sys.path[:1] == [\"\"]:\n    sys.path[0] = os.path.dirname(os.path.realpath(sys.argv[0]))\ncode = hw_code(sys.argv[0])\nm = type(sys)(\"__main__\")\nm.__file__, m.__builtins__ = sys.argv[0], __builtins__\nsys.modules[\"__main__\"] = m\nexec(code, m.__dict__)\n' $HOME/.local/bin/hw hook session-start",
+            "timeout": 10
           }
         ]
       }
@@ -115,8 +116,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.local/bin/hw hook prompt",
-            "timeout": 20
+            "command": "python3 -I -c 'import sys; sys.path.insert(0, \"/home/rigo/.local/lib/memory-server\"); import memsrv; sys.exit(memsrv.main())' prompt-hook",
+            "timeout": 5
           }
         ]
       },
@@ -124,8 +125,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 /home/rigo/.local/lib/memory-server/memsrv.py prompt-hook",
-            "timeout": 5
+            "command": "python3 -c 'import os, sys\ndef hw_code(p):\n    try:\n        import hashlib, marshal\n        with open(p, \"rb\") as f:\n            src = f.read()\n        key = hashlib.sha256((\"hw-hook 1 %s %d\\n\" % (sys.version, sys.flags.optimize)).encode() + src).digest()\n        d = os.path.join(os.environ.get(\"HW_DATA\", os.path.join(os.path.expanduser(\"~\"), \".local/share/herdr-workspace\")), \"cache\")\n        pyc = os.path.join(d, \"hook-%s-%s.pyc\" % (sys.implementation.cache_tag, hashlib.sha256(p.encode()).hexdigest()[:12]))\n        try:\n            with open(pyc, \"rb\") as f:\n                b = f.read()\n            if b[:32] == key:\n                return marshal.loads(b[32:])\n        except Exception:\n            pass\n        code = compile(src, p, \"exec\", dont_inherit=True)\n        tmp = \"%s.%d.tmp\" % (pyc, os.getpid())\n        try:\n            os.makedirs(d, exist_ok=True)\n            with open(tmp, \"wb\") as f:\n                f.write(key + marshal.dumps(code))\n            os.replace(tmp, pyc)\n        except Exception as e:\n            os.environ[\"HW_HOOK_ROUTE\"] = \"compiled, not cached: %s\" % e\n            try:\n                os.remove(tmp)\n            except OSError:\n                pass\n        return code\n    except Exception as e:\n        os.environ[\"HW_HOOK_ROUTE\"] = \"script: %s: %s\" % (type(e).__name__, e)\n        os.execv(p, sys.argv)\ndel sys.argv[0]\nif sys.path[:1] == [\"\"]:\n    sys.path[0] = os.path.dirname(os.path.realpath(sys.argv[0]))\ncode = hw_code(sys.argv[0])\nm = type(sys)(\"__main__\")\nm.__file__, m.__builtins__ = sys.argv[0], __builtins__\nsys.modules[\"__main__\"] = m\nexec(code, m.__dict__)\n' $HOME/.local/bin/hw hook prompt",
+            "timeout": 20
           }
         ]
       }
@@ -135,7 +136,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.local/bin/hw hook stop",
+            "command": "python3 -c 'import os, sys\ndef hw_code(p):\n    try:\n        import hashlib, marshal\n        with open(p, \"rb\") as f:\n            src = f.read()\n        key = hashlib.sha256((\"hw-hook 1 %s %d\\n\" % (sys.version, sys.flags.optimize)).encode() + src).digest()\n        d = os.path.join(os.environ.get(\"HW_DATA\", os.path.join(os.path.expanduser(\"~\"), \".local/share/herdr-workspace\")), \"cache\")\n        pyc = os.path.join(d, \"hook-%s-%s.pyc\" % (sys.implementation.cache_tag, hashlib.sha256(p.encode()).hexdigest()[:12]))\n        try:\n            with open(pyc, \"rb\") as f:\n                b = f.read()\n            if b[:32] == key:\n                return marshal.loads(b[32:])\n        except Exception:\n            pass\n        code = compile(src, p, \"exec\", dont_inherit=True)\n        tmp = \"%s.%d.tmp\" % (pyc, os.getpid())\n        try:\n            os.makedirs(d, exist_ok=True)\n            with open(tmp, \"wb\") as f:\n                f.write(key + marshal.dumps(code))\n            os.replace(tmp, pyc)\n        except Exception as e:\n            os.environ[\"HW_HOOK_ROUTE\"] = \"compiled, not cached: %s\" % e\n            try:\n                os.remove(tmp)\n            except OSError:\n                pass\n        return code\n    except Exception as e:\n        os.environ[\"HW_HOOK_ROUTE\"] = \"script: %s: %s\" % (type(e).__name__, e)\n        os.execv(p, sys.argv)\ndel sys.argv[0]\nif sys.path[:1] == [\"\"]:\n    sys.path[0] = os.path.dirname(os.path.realpath(sys.argv[0]))\ncode = hw_code(sys.argv[0])\nm = type(sys)(\"__main__\")\nm.__file__, m.__builtins__ = sys.argv[0], __builtins__\nsys.modules[\"__main__\"] = m\nexec(code, m.__dict__)\n' $HOME/.local/bin/hw hook stop",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c 'import os, sys\ndef hw_code(p):\n    try:\n        import hashlib, marshal\n        with open(p, \"rb\") as f:\n            src = f.read()\n        key = hashlib.sha256((\"hw-hook 1 %s %d\\n\" % (sys.version, sys.flags.optimize)).encode() + src).digest()\n        d = os.path.join(os.environ.get(\"HW_DATA\", os.path.join(os.path.expanduser(\"~\"), \".local/share/herdr-workspace\")), \"cache\")\n        pyc = os.path.join(d, \"hook-%s-%s.pyc\" % (sys.implementation.cache_tag, hashlib.sha256(p.encode()).hexdigest()[:12]))\n        try:\n            with open(pyc, \"rb\") as f:\n                b = f.read()\n            if b[:32] == key:\n                return marshal.loads(b[32:])\n        except Exception:\n            pass\n        code = compile(src, p, \"exec\", dont_inherit=True)\n        tmp = \"%s.%d.tmp\" % (pyc, os.getpid())\n        try:\n            os.makedirs(d, exist_ok=True)\n            with open(tmp, \"wb\") as f:\n                f.write(key + marshal.dumps(code))\n            os.replace(tmp, pyc)\n        except Exception as e:\n            os.environ[\"HW_HOOK_ROUTE\"] = \"compiled, not cached: %s\" % e\n            try:\n                os.remove(tmp)\n            except OSError:\n                pass\n        return code\n    except Exception as e:\n        os.environ[\"HW_HOOK_ROUTE\"] = \"script: %s: %s\" % (type(e).__name__, e)\n        os.execv(p, sys.argv)\ndel sys.argv[0]\nif sys.path[:1] == [\"\"]:\n    sys.path[0] = os.path.dirname(os.path.realpath(sys.argv[0]))\ncode = hw_code(sys.argv[0])\nm = type(sys)(\"__main__\")\nm.__file__, m.__builtins__ = sys.argv[0], __builtins__\nsys.modules[\"__main__\"] = m\nexec(code, m.__dict__)\n' $HOME/.local/bin/hw hook session-end",
             "timeout": 10
           }
         ]
@@ -156,6 +168,5 @@
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "verbose": true,
-  "switchModelsOnFlag": false,
-  "cleanupPeriodDays": 1095
+  "switchModelsOnFlag": false
 }

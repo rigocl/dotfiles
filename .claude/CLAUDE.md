@@ -29,8 +29,11 @@ everywhere and for topics with no project of their own. A project marked
 "in the ~ memory" keeps its files there until it moves.
 
 Each directory holds one file per topic (kebab-case), frontmatter with
-`name`, `title` (display name), `description` (the one-line keyword-dense
-summary — this IS the index hook, include pending/todo state),
+`name`, `title` (display name), `description` (the index hook, as a
+breadcrumb: one "read when ..." line of about 100 characters naming the
+situations, repos, hosts and commands in which a session needs the file;
+no state: progress, dates and pending items live in the body and
+review-by lines),
 `metadata.type` (user | feedback | project | reference) and
 `metadata.section` (broad-topic index heading). `MEMORY.md` in each is the
 INDEX and a BUILD ARTIFACT, and so is `ALWAYS.md`: `regen-index.py` in the
@@ -68,6 +71,13 @@ nothing else. If the project's memory is still in `~`, offer to move its files
 to the project's directory and mark it `own` in `scopes.json`. On the Mac or
 outside herdr, tell him where to go instead of opening anything.
 
+In a session launched in `~`, the prompt hook may add a `[memory] Project
+routing` line on the first prompt. It is the signal for this offer: make the
+offer it gives, as the whole reply. If he accepts, resume a matching record
+from `hw ls`, else run the command the line gives; its `--task` is his prompt
+verbatim, so the new session starts with it as its first message. If he
+declines, stay and do not ask again.
+
 Capture threshold — save deliberately, not eagerly. Save: durable
 decisions, hard-won gotchas/runbooks, corrections/feedback, and
 ongoing-project checkpoint state. Do not save: session ephemera, facts
@@ -78,7 +88,9 @@ can be vetoed — never write memory silently.
 
 Index discipline: MEMORY.md holds hooks ONLY, never content — every
 fact must live in a file. Editing a file includes refreshing its
-frontmatter `description` (and review-by) in the same edit; the script
+frontmatter `description` (and review-by) in the same edit: the
+breadcrumb when the file's use changed, the body and review-by when its
+state did; the script
 does the rest. If the generated index reports exceeding its size
 tripwire (~120 lines), propose consolidation/archiving instead of
 letting it grow.
