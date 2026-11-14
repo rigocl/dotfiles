@@ -88,6 +88,11 @@ topic file over creating near-duplicates; delete what turns out wrong.
 Every save/update must be mentioned in the reply ("saved to X") so it
 can be vetoed — never write memory silently.
 
+TODO.md is shared: other sessions close and add items while this one
+runs. Before acting on TODO items (starting, delegating or reporting
+them), run `hw todo -p .` again and check that each item is still open
+and unchanged. Do not trust a list read earlier in the session.
+
 Index discipline: MEMORY.md holds hooks ONLY, never content — every
 fact must live in a file. Editing a file includes refreshing its
 frontmatter `description` (and review-by) in the same edit: the

@@ -1,11 +1,12 @@
 {
   "cleanupPeriodDays": 1095,
+  "syncClaudeAiSkills": false,
   "env": {
     "CLAUDE_CODE_DISABLE_ARTIFACT": "1",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_SCROLL_SPEED": "10"
   },
-  "model": "fable",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
