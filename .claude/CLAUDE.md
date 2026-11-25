@@ -61,27 +61,22 @@ is about Y (folder). Want to move there?" This applies in `~` too, which is
 a home for its own topics and not a place to work on projects. Do not offer for a
 passing mention or a quick factual question; answer those in place by reading
 that project's memory. If he declines, stay and do not ask again about that
-topic in this session. If he accepts: run `hw ls` and resume a matching record
-if there is one; otherwise start one with `hw new --space S --folder F --task
-"<handoff>" --focus`, or `hw open-space --folder F --name N --claude --task
-"<handoff>" --focus` when the folder is not a space yet. The handoff holds a
-short summary, what he asked for and this session's ID, which `hw context
---session <id>` can expand. Then offer `hw done` on the old record if it held
-nothing else. If the project's memory is still in `~`, offer to move its files
-to the project's directory and mark it `own` in `scopes.json`. On the Mac or
-outside herdr, tell him where to go instead of opening anything.
+topic in this session. If he accepts: write a handoff (a short summary, what
+he asked for and this session's ID) and tell him which folder to start the
+session in, with the handoff as its first prompt. Do not open sessions
+yourself unless the environment gives you a tool for it. If the project's
+memory is still in `~`, offer to move its files to the project's directory
+and mark it `own` in `scopes.json`.
 
 In a session launched in `~`, the prompt hook may add a `[memory] Project
 routing` line on the first prompt. It is the signal for this offer: make the
-offer it gives, as the whole reply. If he accepts, resume a matching record
-from `hw ls`, else run the command the line gives; its `--task` is his prompt
-verbatim, so the new session starts with it as its first message. If he
+offer it gives, as the whole reply. If he accepts, tell him the folder and
+give his prompt verbatim as the new session's first message. If he
 declines, stay and do not ask again.
 
 Capture threshold — save deliberately, not eagerly. Save: durable
 decisions, hard-won gotchas/runbooks and corrections/feedback. Project
-status and pending work go in the project's `TODO.md` (`hw todo` lists and
-edits it), not in memory. A topic with no project folder keeps its state in
+status and pending work go in the project's `TODO.md`, not in memory. A topic with no project folder keeps its state in
 the body of its memory file. Do not save: session ephemera, facts
 derivable from a repo or config, one-off fixes. Update the existing
 topic file over creating near-duplicates; delete what turns out wrong.
@@ -90,7 +85,7 @@ can be vetoed — never write memory silently.
 
 TODO.md is shared: other sessions close and add items while this one
 runs. Before acting on TODO items (starting, delegating or reporting
-them), run `hw todo -p .` again and check that each item is still open
+them), read `TODO.md` again and check that each item is still open
 and unchanged. Do not trust a list read earlier in the session.
 
 Index discipline: MEMORY.md holds hooks ONLY, never content — every
@@ -111,6 +106,11 @@ them: "X is due — still true? / time to do it again?" Never silently
 delete on expiry — ask, then update, re-date, or move the file to
 `memory/archive/` (excluded from the index; history, not active
 memory).
+
+# Existing work on a topic
+
+Before designing or building on a topic, read the `TODO.md` of the
+projects involved, and the open and doing items on that topic.
 
 # Delegation
 
